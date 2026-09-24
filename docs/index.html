@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onn Remote on Linux</title>
+<meta name="description" content="Use the Onn / Google TV Bluetooth remote on Linux: pairing, all key codes, the voice microphone (ATVV protocol) and working Python code.">
+<link rel="icon" href="remote.svg" type="image/svg+xml">
+<style>
+  :root{
+    --bg:#fafaf9; --panel:#ffffff; --text:#1c1d21; --muted:#5d616b; --line:#e3e4e8;
+    --accent:#2b59d9; --accent-soft:#e8eefc; --code-bg:#f3f4f6; --warn-bg:#fff6e0; --warn-line:#f0c96a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#131417; --panel:#1b1c21; --text:#e8e9ed; --muted:#9a9ea9; --line:#2b2d34;
+      --accent:#7ea2ff; --accent-soft:#1f2740; --code-bg:#22242b; --warn-bg:#2b2412; --warn-line:#6b5522;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#131417; --panel:#1b1c21; --text:#e8e9ed; --muted:#9a9ea9; --line:#2b2d34;
+    --accent:#7ea2ff; --accent-soft:#1f2740; --code-bg:#22242b; --warn-bg:#2b2412; --warn-line:#6b5522;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:900px;margin:0 auto;padding:0 16px}
+  header.hero{padding:56px 0 32px;border-bottom:1px solid var(--line)}
+  .hero-grid{display:grid;grid-template-columns:1fr 200px;gap:32px;align-items:center}
+  h1{font-size:clamp(2rem,5vw,2.9rem);line-height:1.15;margin:0 0 12px;letter-spacing:-.02em}
+  .lead{font-size:1.15rem;color:var(--muted);margin:0 0 20px}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+  .badge{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 12px;font-size:.85rem;font-weight:600}
+  .cta{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;padding:10px 18px;border-radius:10px}
+  .cta.alt{background:transparent;color:var(--accent);border:1px solid var(--accent);margin-left:8px}
+  .hero img{width:100%;height:auto}
+  nav{position:sticky;top:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:5}
+  nav .wrap{display:flex;gap:6px;overflow-x:auto;padding:8px 16px}
+  nav a{white-space:nowrap;color:var(--muted);text-decoration:none;padding:4px 10px;border-radius:8px;font-size:.92rem}
+  nav a:hover{background:var(--accent-soft);color:var(--accent)}
+  section{padding:40px 0 8px}
+  h2{font-size:1.65rem;margin:0 0 12px;letter-spacing:-.01em}
+  h3{font-size:1.15rem;margin:26px 0 8px}
+  p,li{max-width:70ch}
+  a{color:var(--accent)}
+  code{background:var(--code-bg);padding:1px 6px;border-radius:5px;font:.9em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;line-height:1.5;margin:12px 0}
+  pre code{background:none;padding:0;font-size:.85rem}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:.95rem;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line)}
+  th{background:var(--code-bg);font-weight:600}
+  tr:last-child td{border-bottom:0}
+  td.mono{font:.88rem ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .note{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:12px 16px;margin:16px 0}
+  .note p{margin:0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .card h3{margin-top:0}
+  ol.steps{padding-left:22px}
+  ol.steps li{margin:8px 0}
+  .scroll{overflow-x:auto}
+  footer{margin-top:56px;padding:28px 0 48px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+  .affiliate{font-size:.82rem;color:var(--muted);margin-top:8px}
+  @media (max-width:700px){
+    .hero-grid{grid-template-columns:1fr}
+    .hero img{max-width:160px;margin:0 auto}
+    .grid2{grid-template-columns:1fr}
+    .cta.alt{margin:8px 0 0}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="badges"><span class="badge">Linux</span><span class="badge">BlueZ</span><span class="badge">Python + bleak</span><span class="badge">Voice microphone</span></div>
+      <h1>Use the Onn / Google&nbsp;TV Bluetooth remote on Linux</h1>
+      <p class="lead">Pairing, every key code, and the built-in microphone - decoded and turned into working Python code. Use the remote as a keyboard shortcut pad or as a push-to-talk dictation microphone for your desktop.</p>
+      <a class="cta" href="#pairing">Start with pairing</a>
+      <a class="cta alt" href="https://github.com/FloMaetschke/onn-remote-linux">View on GitHub</a>
+    </div>
+    <img src="remote.svg" alt="Schematic drawing of the remote with all buttons labelled">
+  </div>
+</header>
+
+<nav><div class="wrap">
+  <a href="#overview">Overview</a><a href="#get">Get one</a><a href="#pairing">Pairing</a><a href="#hid">Linux &amp; HID</a><a href="#keys">Key codes</a><a href="#voice">Voice / microphone</a><a href="#code">Code</a><a href="#service">Run as service</a><a href="#trouble">Troubleshooting</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="overview">
+  <h2>Overview</h2>
+  <p>The remote is a plain Bluetooth&nbsp;LE device with a standard HID service and Google's proprietary voice service. It works with any Linux machine that has a BlueZ-supported Bluetooth adapter - but out of the box you get <strong>no key events and no microphone</strong>. This page explains why, and how to get both anyway.</p>
+  <div class="grid2">
+    <div class="card"><h3>What works</h3>
+      <ul>
+        <li>Pairing with <code>bluetoothctl</code>, auto-reconnect after a key press</li>
+        <li>All 22 buttons decoded (table below)</li>
+        <li>Microphone: 8&nbsp;kHz voice audio streamed to your PC</li>
+        <li>Push-to-talk dictation into the focused window</li>
+      </ul></div>
+    <div class="card"><h3>What does not</h3>
+      <ul>
+        <li>The Linux kernel rejects the remote's HID descriptor, so there is no <code>/dev/input</code> device</li>
+        <li>The remote does not report the <em>release</em> of the Assistant button</li>
+        <li>Voice streaming is capped at ~15&nbsp;s per session (can be re-opened seamlessly)</li>
+        <li>Power / Input are sent over Bluetooth only as HID codes - no TV is controlled</li>
+      </ul></div>
+  </div>
+</section>
+
+<section id="get">
+  <h2>Get the remote</h2>
+  <p>This is the remote used for everything on this page (white, Google Assistant button, YouTube / Netflix / Disney+ / HBO&nbsp;max buttons, advertises as <code>Onn-Remote</code>):</p>
+  <p><a class="cta" href="https://amzn.to/4rvycF1" rel="sponsored noopener">View the remote on Amazon</a></p>
+  <p class="affiliate">Affiliate link (advertising): if you buy through it, the author may receive a small commission. The price stays the same for you.</p>
+</section>
+
+<section id="pairing">
+  <h2>Pairing on Linux</h2>
+  <p>You need a working Bluetooth adapter and <code>bluez</code> (<code>bluetoothctl</code>).</p>
+  <div class="note"><p><strong>Put the remote into pairing mode:</strong> hold <strong>Back + Home</strong> together for <strong>2&ndash;3 seconds</strong> until the remote enters pairing mode (the LED usually blinks). Pairing mode does not last long, so start the scan first and then put the remote into pairing mode.</p></div>
+  <ol class="steps">
+    <li>Start <code>bluetoothctl</code> and switch on the adapter and the agent:
+<pre><code>bluetoothctl
+[bluetooth]# power on
+[bluetooth]# agent on
+[bluetooth]# default-agent</code></pre></li>
+    <li>Start scanning, then put the remote into pairing mode. It shows up as <code>Onn-Remote</code>:
+<pre><code>[bluetooth]# scan on
+[NEW] Device AA:BB:CC:DD:EE:FF Onn-Remote</code></pre></li>
+    <li>Pair, trust and connect (use your remote's address):
+<pre><code>[bluetooth]# pair AA:BB:CC:DD:EE:FF
+Pairing successful
+[bluetooth]# trust AA:BB:CC:DD:EE:FF
+[bluetooth]# connect AA:BB:CC:DD:EE:FF
+[bluetooth]# scan off</code></pre></li>
+    <li>Check the result - you should see <code>Paired: yes</code>, <code>Trusted: yes</code>, the HID service and a battery percentage:
+<pre><code>[bluetooth]# info AA:BB:CC:DD:EE:FF
+    Name: Onn-Remote
+    Paired: yes   Bonded: yes   Trusted: yes   Connected: yes
+    UUID: Human Interface Device    (00001812-...)
+    UUID: Battery Service           (0000180f-...)
+    UUID: Vendor specific           (ab5e0001-5a21-4f05-bc7d-af01f617b664)
+    Battery Percentage: 0x64 (100)</code></pre></li>
+  </ol>
+  <p>Because the device is <em>trusted</em>, it reconnects on its own the next time you press a button. The remote goes to sleep after a short idle time; the first key press after that only wakes it up and is usually lost.</p>
+  <div class="note"><p><strong>Scan finds nothing at all?</strong> Then the problem is probably your adapter, not the remote. Cheap "CSR8510" USB dongles are often counterfeit (Barrot 8041a02) and cannot receive advertisements reliably - see <a href="#trouble">troubleshooting</a>.</p></div>
+</section>
+
+<section id="hid">
+  <h2>Why there are no key events on Linux</h2>
+  <p>After pairing, BlueZ connects the HID service and hands the report descriptor to the kernel. For this remote the kernel logs:</p>
+<pre><code>hid-generic 0005:0957:0005.006E: item fetching failed at offset 22/23
+hid-generic 0005:0957:0005.006E: probe with driver hid-generic failed with error -22</code></pre>
+  <p>The descriptor is slightly malformed, so no input device is created and desktop shortcuts never see the keys. The good news: the remote still <em>sends</em> the HID reports as GATT notifications, and you can read them directly - no root, no kernel patch. That is what the Python examples do, using <a href="https://github.com/hbldh/bleak">bleak</a>.</p>
+  <h3>GATT layout</h3>
+  <div class="scroll"><table>
+    <tr><th>Service</th><th>Characteristic</th><th>Purpose</th></tr>
+    <tr><td class="mono">0x1812 HID</td><td class="mono">0x2A4D Report (several)</td><td>Key presses (notify)</td></tr>
+    <tr><td class="mono">0x180F Battery</td><td class="mono">0x2A19</td><td>Battery level</td></tr>
+    <tr><td class="mono">ab5e0001-5a21-4f05-bc7d-af01f617b664</td><td class="mono">ab5e0002 (write)<br>ab5e0003 (notify)<br>ab5e0004 (notify)</td><td>Google voice service (ATVV): commands, audio data, control messages</td></tr>
+    <tr><td class="mono">d343bfc0-5a21-4f05-bc7d-af01f617b664</td><td class="mono">d343bfc1 ... bfc5</td><td>Vendor-specific (not needed)</td></tr>
+  </table></div>
+</section>
+
+<section id="keys">
+  <h2>Key codes</h2>
+  <p>Every button arrives as an HID report on <code>0x2A4D</code>. Short reports (2 or 4&nbsp;bytes) carry a 16-bit usage of the <em>Consumer Control</em> page in the first two bytes (little endian); the volume keys use an 8-byte keyboard report instead. Releasing sends an all-zero report right away - the remote reports taps, not "held" keys. Codes were determined by pressing every button in a fixed order and logging the raw notifications.</p>
+  <div class="scroll"><table>
+    <tr><th>Button</th><th>Report (hex)</th><th>Usage</th><th>Notes</th></tr>
+    <tr><td>Power</td><td class="mono">30 00 00 00</td><td class="mono">0x0030</td><td>HID Power</td></tr>
+    <tr><td>Input</td><td class="mono">bb 01 00 00</td><td class="mono">0x01BB</td><td></td></tr>
+    <tr><td>Assistant</td><td class="mono">21 02</td><td class="mono">0x0221</td><td>AC Search. Also sends ATVV control message <code>08</code> (start search)</td></tr>
+    <tr><td>Bookmark</td><td class="mono">2a 02 00 00</td><td class="mono">0x022A</td><td>AC Bookmarks</td></tr>
+    <tr><td>Settings (gear)</td><td class="mono">96 00 00 00</td><td class="mono">0x0096</td><td></td></tr>
+    <tr><td>D-pad Up</td><td class="mono">42 00 00 00</td><td class="mono">0x0042</td><td>Menu Up</td></tr>
+    <tr><td>D-pad Down</td><td class="mono">43 00 00 00</td><td class="mono">0x0043</td><td>Menu Down</td></tr>
+    <tr><td>D-pad Left</td><td class="mono">44 00 00 00</td><td class="mono">0x0044</td><td>Menu Left</td></tr>
+    <tr><td>D-pad Right</td><td class="mono">45 00 00 00</td><td class="mono">0x0045</td><td>Menu Right</td></tr>
+    <tr><td>OK (center)</td><td class="mono">41 00 00 00</td><td class="mono">0x0041</td><td>Menu Pick</td></tr>
+    <tr><td>Back</td><td class="mono">24 02</td><td class="mono">0x0224</td><td>AC Back</td></tr>
+    <tr><td>Home</td><td class="mono">23 02</td><td class="mono">0x0223</td><td>AC Home</td></tr>
+    <tr><td>TV</td><td class="mono">8d 00 00 00</td><td class="mono">0x008D</td><td>Program guide</td></tr>
+    <tr><td>Mute</td><td class="mono">e2 00 00 00</td><td class="mono">0x00E2</td><td>Mute</td></tr>
+    <tr><td>Channel +</td><td class="mono">9c 00 00 00</td><td class="mono">0x009C</td><td>Channel Increment</td></tr>
+    <tr><td>Channel -</td><td class="mono">9d 00 00 00</td><td class="mono">0x009D</td><td>Channel Decrement</td></tr>
+    <tr><td>Volume +</td><td class="mono">00 00 80 00 00 00 00 00</td><td class="mono">key 0x80</td><td>8-byte keyboard report, key in byte 2</td></tr>
+    <tr><td>Volume -</td><td class="mono">00 00 81 00 00 00 00 00</td><td class="mono">key 0x81</td><td>8-byte keyboard report, key in byte 2</td></tr>
+    <tr><td>YouTube</td><td class="mono">77 00 00 00</td><td class="mono">0x0077</td><td></td></tr>
+    <tr><td>Netflix</td><td class="mono">78 00 00 00</td><td class="mono">0x0078</td><td></td></tr>
+    <tr><td>Disney+</td><td class="mono">79 00 00 00</td><td class="mono">0x0079</td><td></td></tr>
+    <tr><td>HBO max</td><td class="mono">7a 00 00 00</td><td class="mono">0x007A</td><td></td></tr>
+  </table></div>
+  <p>Decoding is a few lines:</p>
+<pre><code>def decode_key(data: bytes):
+    if not any(data):
+        return None                      # release
+    if len(data) == 8:                   # keyboard report: volume keys
+        return {0x80: "Volume +", 0x81: "Volume -"}.get(data[2])
+    usage = data[0] | (data[1] &lt;&lt; 8 if len(data) &gt; 1 else 0)
+    return CONSUMER.get(usage)           # table above</code></pre>
+</section>
+
+<section id="voice">
+  <h2>The microphone (ATVV voice protocol)</h2>
+  <p>The Assistant button does not use a Bluetooth audio profile. Google remotes stream voice over BLE notifications using the <strong>ATVV</strong> ("Android TV Voice") service <code>ab5e0001-...</code>. Three characteristics matter:</p>
+  <div class="scroll"><table>
+    <tr><th>UUID</th><th>Direction</th><th>Use</th></tr>
+    <tr><td class="mono">ab5e0002-...</td><td>write</td><td>Commands to the remote</td></tr>
+    <tr><td class="mono">ab5e0003-...</td><td>notify</td><td>Audio frames</td></tr>
+    <tr><td class="mono">ab5e0004-...</td><td>notify</td><td>Control messages</td></tr>
+  </table></div>
+  <h3>Commands (write to <code>ab5e0002</code>)</h3>
+  <div class="scroll"><table>
+    <tr><th>Bytes</th><th>Command</th></tr>
+    <tr><td class="mono">0a 00 04 00 01</td><td>GET_CAPS - protocol 0.4, 8&nbsp;kHz ADPCM. Send once after connecting; the remote answers <code>0b ...</code> (frame size 134 bytes)</td></tr>
+    <tr><td class="mono">0c 00 01</td><td>MIC_OPEN - start streaming (8&nbsp;kHz ADPCM)</td></tr>
+    <tr><td class="mono">0d</td><td>MIC_CLOSE - stop streaming (also clears a stuck state)</td></tr>
+  </table></div>
+  <h3>Control messages (notify on <code>ab5e0004</code>)</h3>
+  <div class="scroll"><table>
+    <tr><th>First byte</th><th>Meaning</th></tr>
+    <tr><td class="mono">08</td><td>Assistant button pressed - answer with MIC_OPEN</td></tr>
+    <tr><td class="mono">04</td><td>Audio stream starts (reset your frame buffer)</td></tr>
+    <tr><td class="mono">0a xx xx</td><td>Sync / timestamp, every ~350&nbsp;ms while streaming</td></tr>
+    <tr><td class="mono">00</td><td>Audio stream ended - after MIC_CLOSE or the remote's own ~15&nbsp;s limit</td></tr>
+    <tr><td class="mono">0b ...</td><td>Reply to GET_CAPS</td></tr>
+  </table></div>
+  <h3>Audio format</h3>
+  <p>Frames of <strong>134 bytes</strong> arrive split into six 20-byte notifications and one 14-byte notification on <code>ab5e0003</code>. Each frame is <code>[0:2]</code> sequence number, <code>[2]</code> stream id, <code>[3:5]</code> predictor (int16, big endian), <code>[5]</code> step index, <code>[6:134]</code> 128&nbsp;bytes of <strong>IMA&nbsp;ADPCM</strong> (high nibble first) = 256 samples of 8&nbsp;kHz mono, 32&nbsp;ms per frame.</p>
+  <div class="note"><p><strong>Two protocol quirks:</strong> (1) The remote never reports the <em>release</em> of the Assistant button. Use another key (OK) or a second press to end a recording. (2) The stream is cut off after about 15&nbsp;s; send MIC_OPEN again on the <code>00</code> message to continue seamlessly (up to a minute works fine; a short gap can occur at the seams).</p></div>
+</section>
+
+<section id="code">
+  <h2>Python code</h2>
+  <p>All code is in the <a href="https://github.com/FloMaetschke/onn-remote-linux/tree/main/examples">examples folder</a>. Install once:</p>
+<pre><code>git clone https://github.com/FloMaetschke/onn-remote-linux
+cd onn-remote-linux
+python -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt</code></pre>
+  <h3>1. See every key press live</h3>
+<pre><code>.venv/bin/python examples/01_listen_keys.py AA:BB:CC:DD:EE:FF
+
+   3.21s  Up           (report 42 00 00 00)
+   3.84s  OK           (report 41 00 00 00)
+   5.02s  Assistant button (ATVV START_SEARCH)
+   5.02s  Assistant    (report 21 02)</code></pre>
+  <p>The core is a loop over all notifiable characteristics:</p>
+<pre><code>async with BleakClient(device(address), timeout=8) as client:
+    for service in client.services:
+        for char in service.characteristics:
+            if "notify" in char.properties and char.uuid != ATVV_RX:
+                await client.start_notify(char, on_report)</code></pre>
+  <h3>2. Record the microphone to a WAV file</h3>
+<pre><code>.venv/bin/python examples/02_record_voice.py AA:BB:CC:DD:EE:FF
+ready - press the Assistant button
+recording - press OK to finish
+saved: recording-1.wav (6.4 s)</code></pre>
+  <p>The heart of it - open the mic on the button, decode frames as they arrive:</p>
+<pre><code>def on_ctl(_, data):
+    if data[0] == CTL_START_SEARCH:                # Assistant button
+        asyncio.create_task(send(CMD_MIC_OPEN))
+
+def on_audio(_, data):                             # ab5e0003 notifications
+    pcm.extend(frames.push(bytes(data)))           # -&gt; 256 samples per frame
+
+# ...later
+write_wav("recording-1.wav", b"".join(pcm))        # 8 kHz, 16 bit, mono</code></pre>
+  <h3>3. Dictation into the focused window</h3>
+  <p><code>03_dictation_service.py</code> connects the remote to a speech-to-text tool. The tool records from the <em>default microphone</em>, so the service creates a virtual PipeWire/PulseAudio sink, plays the decoded remote audio into it, and temporarily makes its monitor the default source:</p>
+<pre><code>pactl load-module module-null-sink sink_name=onn_remote
+pactl set-default-source onn_remote.monitor      # while dictating
+pacat -p -d onn_remote --format=s16le --rate=8000 --channels=1   # decoded audio goes in here</code></pre>
+  <p>Push-to-talk flow: <strong>Assistant</strong> starts the dictation tool, <strong>OK</strong> stops it and the text is typed into the focused window. Your normal microphone and shortcut keep working; the previous default source is restored after every run. It is written for <a href="https://omarchy.org">Omarchy</a> with <code>omarchy-dictation</code> / <code>voxtype</code>, but any command pair works:</p>
+<pre><code>ONN_ADDR=AA:BB:CC:DD:EE:FF \
+ONN_START_CMD="my-stt start" ONN_STOP_CMD="my-stt stop" \
+.venv/bin/python examples/03_dictation_service.py</code></pre>
+  <p>With <code>ONN_HYPRLAND=1</code> the D-pad also moves window focus and Channel&nbsp;+/- switches the workspace (Hyprland Lua dispatchers):</p>
+<pre><code>hyprctl dispatch 'hl.dsp.focus({ direction = "l" })'
+hyprctl dispatch 'hl.dsp.focus({ workspace = "e+1" })'</code></pre>
+</section>
+
+<section id="service">
+  <h2>Run it as a service</h2>
+<pre><code>mkdir -p ~/.config/systemd/user
+cp systemd/onn-voice.service ~/.config/systemd/user/
+# edit ONN_ADDR and the paths in the file, then:
+systemctl --user daemon-reload
+systemctl --user enable --now onn-voice.service
+journalctl --user -u onn-voice -f</code></pre>
+  <p>The service reconnects on its own whenever the remote wakes up from standby.</p>
+</section>
+
+<section id="trouble">
+  <h2>Troubleshooting</h2>
+  <h3>"Device ... was not found" from bleak</h3>
+  <p>The remote sleeps and does not advertise, so <code>BleakClient("AA:BB:...")</code> cannot find it in its scan cache. Build the device from BlueZ's object path instead (already done in <code>atvv.device()</code>):</p>
+<pre><code>from bleak.backends.device import BLEDevice
+path = f"/org/bluez/hci0/dev_{address.replace(':', '_')}"
+client = BleakClient(BLEDevice(address, "Onn-Remote", {"path": path, "props": {}}))</code></pre>
+  <h3>Key presses stop arriving after restarting your program</h3>
+  <p>After several quick restarts BlueZ can stop forwarding notifications although the remote still shows <code>Connected: yes</code>. Reset the link:</p>
+<pre><code>bluetoothctl disconnect AA:BB:CC:DD:EE:FF
+# restart your program, then press any button on the remote</code></pre>
+  <p>Sending <code>MIC_CLOSE</code> right after connecting (as the examples do) also clears a stuck voice state; the remote answers with <code>00</code>.</p>
+  <h3>Scan finds no devices at all / adapter problems</h3>
+  <p>Cheap "CSR8510" USB dongles are frequently counterfeit clones (Barrot 8041a02). The kernel says so:</p>
+<pre><code>Bluetooth: hci0: CSR: Unbranded CSR clone detected; adding workarounds and force-suspending once...
+Bluetooth: hci0: CSR: Couldn't suspend the device for our Barrot 8041a02 receive-issue workaround</code></pre>
+  <p>These chips cannot receive advertisements reliably, there is no firmware update, and behind USB hubs the workaround often fails. Use a dongle with a Realtek RTL8761B chipset (e.g. TP-Link UB500), which is supported by the mainline kernel out of the box.</p>
+  <h3>The first key press after some idle time does nothing</h3>
+  <p>Expected: the remote wakes up and reconnects with that press. Press again.</p>
+  <h3>Dictation returns "Thank you." or other filler on silence</h3>
+  <p>Whisper-style models hallucinate on silence. If a recording contains no speech, stop it with OK right away, or check the recorded audio with <code>02_record_voice.py</code>.</p>
+  <h3>Discovering codes for a different remote</h3>
+  <p>Run <code>01_listen_keys.py</code>, press each button twice with a pause in between, and note the raw reports. Group by pauses; keys pressed less than ~2&nbsp;s apart run together in the log.</p>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Independent, unofficial documentation based on my own experiments with this remote. Not affiliated with Google, Walmart or onn. Protocol details were worked out by observing the remote's behaviour and may differ between remote models and firmware versions.</p>
+    <p>Code: MIT licensed. <a href="https://github.com/FloMaetschke/onn-remote-linux">github.com/FloMaetschke/onn-remote-linux</a></p>
+  </div>
+</footer>
+</body>
+</html>

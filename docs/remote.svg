@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 660" role="img" aria-labelledby="t d">
+  <title id="t">Onn / Google TV Bluetooth remote - button layout</title>
+  <desc id="d">Schematic drawing of the remote with all buttons labelled.</desc>
+  <style>
+    .body{fill:#e4e5e7;stroke:#b9bbc0;stroke-width:2}
+    .btn{fill:#fff;stroke:#b9bbc0;stroke-width:1.5}
+    .pad{fill:#23262c}
+    .ok{fill:#2f333b;stroke:#4a4f59;stroke-width:1.5}
+    .t{font:600 10px system-ui,sans-serif;fill:#30343b;text-anchor:middle}
+    .tw{font:600 10px system-ui,sans-serif;fill:#e9eaee;text-anchor:middle}
+    .tl{font:700 9px system-ui,sans-serif;text-anchor:middle}
+    .assist{fill:#2c3350;stroke:#4a4f59;stroke-width:1.5}
+  </style>
+  <rect class="body" x="30" y="10" width="200" height="640" rx="46"/>
+
+  <!-- top row -->
+  <circle class="btn" cx="70" cy="60" r="19"/><text class="t" x="70" y="63">Power</text>
+  <rect class="btn" x="168" y="41" width="38" height="38" rx="12"/><text class="t" x="187" y="63">Input</text>
+  <circle cx="130" cy="72" r="3" fill="#c7c9ce"/>
+
+  <!-- assistant -->
+  <circle class="assist" cx="130" cy="112" r="22"/>
+  <circle cx="122" cy="108" r="4" fill="#4285f4"/><circle cx="132" cy="103" r="4" fill="#ea4335"/>
+  <circle cx="139" cy="112" r="4" fill="#fbbc05"/><circle cx="130" cy="120" r="4" fill="#34a853"/>
+  <text class="t" x="130" y="146">Assistant</text>
+
+  <!-- bookmark / settings -->
+  <rect class="btn" x="52" y="126" width="38" height="38" rx="12"/><text class="t" x="71" y="148">Bookm.</text>
+  <rect class="btn" x="170" y="126" width="38" height="38" rx="12"/><text class="t" x="189" y="148">Settings</text>
+
+  <!-- d-pad -->
+  <circle class="pad" cx="130" cy="235" r="78"/>
+  <circle class="ok" cx="130" cy="235" r="32"/>
+  <text class="tw" x="130" y="239">OK</text>
+  <text class="tw" x="130" y="182">Up</text><text class="tw" x="130" y="296">Down</text>
+  <text class="tw" x="78" y="239">Left</text><text class="tw" x="183" y="239">Right</text>
+
+  <!-- back / home / tv -->
+  <circle class="btn" cx="70" cy="349" r="19"/><text class="t" x="70" y="352">Back</text>
+  <circle class="ok" cx="130" cy="359" r="19"/><text class="tw" x="130" y="362">Home</text>
+  <circle class="btn" cx="190" cy="349" r="19"/><text class="t" x="190" y="352">TV</text>
+
+  <!-- volume / mute / channel -->
+  <rect class="btn" x="52" y="392" width="40" height="86" rx="20"/>
+  <text class="t" x="72" y="418">Vol +</text><text class="t" x="72" y="462">Vol -</text>
+  <circle class="ok" cx="130" cy="435" r="19"/><text class="tw" x="130" y="438">Mute</text>
+  <rect class="btn" x="168" y="392" width="40" height="86" rx="20"/>
+  <text class="t" x="188" y="418">Ch +</text><text class="t" x="188" y="462">Ch -</text>
+
+  <!-- app buttons -->
+  <rect x="52" y="506" width="74" height="30" rx="15" fill="#fff" stroke="#b9bbc0" stroke-width="1.5"/>
+  <text class="tl" x="89" y="525" fill="#d62828" style="fill:#d62828">YouTube</text>
+  <rect x="134" y="506" width="74" height="30" rx="15" fill="#fff" stroke="#b9bbc0" stroke-width="1.5"/>
+  <text class="tl" x="171" y="525" style="fill:#c8102e">NETFLIX</text>
+  <rect x="52" y="548" width="74" height="30" rx="15" fill="#fff" stroke="#b9bbc0" stroke-width="1.5"/>
+  <text class="tl" x="89" y="567" style="fill:#1a3a8a">Disney+</text>
+  <rect x="134" y="548" width="74" height="30" rx="15" fill="#fff" stroke="#b9bbc0" stroke-width="1.5"/>
+  <text class="tl" x="171" y="567" style="fill:#30343b">HBO max</text>
+
+  <!-- pairing hint -->
+  <text class="t" x="130" y="612" style="font-size:9px;fill:#6b6f78">Pairing: hold Back + Home 2-3 s</text>
+</svg>

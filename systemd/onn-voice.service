@@ -1,0 +1,17 @@
+# Copy to ~/.config/systemd/user/onn-voice.service, adjust the paths and the address, then:
+#   systemctl --user daemon-reload && systemctl --user enable --now onn-voice.service
+[Unit]
+Description=Onn remote: Assistant button -> dictation
+After=bluetooth.target pipewire.service
+
+[Service]
+WorkingDirectory=%h/onn-remote-linux/examples
+ExecStart=%h/onn-remote-linux/.venv/bin/python 03_dictation_service.py
+Environment=ONN_ADDR=AA:BB:CC:DD:EE:FF
+Environment=ONN_HYPRLAND=1
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target
