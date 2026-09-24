@@ -5,7 +5,7 @@ This is the version that runs day to day (Omarchy / Hyprland / PipeWire / voxtyp
 It shows the whole pattern and can be adapted through environment variables:
 
   ONN_ADDR        Bluetooth address of the remote (required)
-  ONN_ADAPTER     Bluetooth adapter, default hci0
+  ONN_ADAPTER     Bluetooth adapter (hci0, ...); default: look it up automatically
   ONN_START_CMD   command that starts recording/recognition (default: omarchy-dictation start)
   ONN_STOP_CMD    command that stops it and types the text (default: omarchy-dictation stop)
   ONN_HYPRLAND    1 = arrow keys move focus, Channel +/- switches workspace (default 0)
@@ -34,7 +34,7 @@ from atvv import (ATVV_CTL, ATVV_RX, ATVV_TX, CMD_GET_CAPS, CMD_MIC_CLOSE, CMD_M
                   decode_key, device)
 
 ADDR = os.environ["ONN_ADDR"]
-ADAPTER = os.environ.get("ONN_ADAPTER", "hci0")
+ADAPTER = os.environ.get("ONN_ADAPTER")  # empty = look it up automatically
 START_CMD = shlex.split(os.environ.get("ONN_START_CMD", "omarchy-dictation start"))
 STOP_CMD = shlex.split(os.environ.get("ONN_STOP_CMD", "omarchy-dictation stop"))
 HYPRLAND = os.environ.get("ONN_HYPRLAND", "0") == "1"

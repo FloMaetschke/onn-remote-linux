@@ -8,7 +8,9 @@ Contains
 
 Dependency: pip install bleak
 """
+import re
 import struct
+import subprocess
 import wave
 
 from bleak.backends.device import BLEDevice
@@ -74,15 +76,28 @@ def decode_key(data: bytes):
 
 
 # --- Connection -------------------------------------------------------------
-def device(address: str, adapter: str = "hci0") -> BLEDevice:
+def device_path(address: str, adapter: str = None) -> str:
+    """BlueZ object path of a paired device. The adapter number (hciN) can change after a
+    reboot or when the dongle is moved to another USB port, so it is looked up via D-Bus."""
+    tail = "dev_" + address.upper().replace(":", "_")
+    if adapter:
+        return f"/org/bluez/{adapter}/{tail}"
+    out = subprocess.run(["busctl", "--system", "tree", "org.bluez", "--list"],
+                         capture_output=True, text=True).stdout
+    for line in out.splitlines():
+        if re.fullmatch(r"/org/bluez/hci\d+/" + tail, line.strip()):
+            return line.strip()
+    return f"/org/bluez/hci0/{tail}"
+
+
+def device(address: str, adapter: str = None) -> BLEDevice:
     """Build a BLEDevice directly from the BlueZ D-Bus object path.
 
     Background: the remote sleeps most of the time and then does not show up in a scan.
     `BleakClient("AA:BB:...")` fails with "Device ... was not found" even though the
     paired device is known to BlueZ. With the object path bleak connects anyway.
     """
-    path = f"/org/bluez/{adapter}/dev_{address.upper().replace(':', '_')}"
-    return BLEDevice(address, "Onn-Remote", {"path": path, "props": {}})
+    return BLEDevice(address, "Onn-Remote", {"path": device_path(address, adapter), "props": {}})
 
 
 # --- Audio ------------------------------------------------------------------
