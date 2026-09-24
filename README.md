@@ -1,6 +1,6 @@
 # Onn / Google TV Bluetooth remote on Linux
 
-<img src="docs/remote.svg" alt="Remote button layout" align="right" width="150">
+<img src="docs/remote.png" alt="The Onn / Google TV Bluetooth remote" align="right" width="150">
 
 Pairing, every key code and the built-in **microphone** of the Onn / Google TV Bluetooth remote - decoded and turned into working Python code. Use the remote as a shortcut pad for your desktop or as a **push-to-talk dictation microphone**.
 
